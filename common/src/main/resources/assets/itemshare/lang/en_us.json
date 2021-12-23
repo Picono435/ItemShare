@@ -1,0 +1,10 @@
+{
+  "text.autoconfig.itemshare.title": "ItemShare Configuration",
+  "text.autoconfig.itemshare.option.serverName": "Server Name",
+  "text.autoconfig.itemshare.option.mysqlConfig": "MySQL Configuration",
+  "text.autoconfig.itemshare.option.mysqlConfig.address": "Address",
+  "text.autoconfig.itemshare.option.mysqlConfig.port": "Port",
+  "text.autoconfig.itemshare.option.mysqlConfig.databaseName": "Database Name",
+  "text.autoconfig.itemshare.option.mysqlConfig.username": "Username",
+  "text.autoconfig.itemshare.option.mysqlConfig.password": "Password"
+}

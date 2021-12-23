@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "itemshare",
+  "version": "${version}",
+  "name": "ItemShare",
+  "description": "This mod is a simple mod that creates a command that allows you to transfer items between servers!",
+  "authors": [
+    "Picono435"
+  ],
+  "contact": {
+    "homepage": "https://piconodev.pt/"
+  },
+  "license": "All rights reserved",
+  "icon": "assets/itemshare/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.gmail.picono435.itemshare.fabric.ItemShareFabric"
+    ],
+    "modmenu": [
+      "com.gmail.picono435.itemshare.fabric.hook.ModMenuIntegration"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.12.0",
+    "fabric": "*",
+    "minecraft": ">=1.16.5",
+    "architectury": ">=1.1.55"
+  },
+  "suggests": {
+    "flamingo": "*"
+  },
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.discord": "https://discord.gg/wQj53Hy"
+      }
+    }
+  }
+}

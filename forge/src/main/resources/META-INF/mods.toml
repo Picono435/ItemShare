@@ -1,0 +1,35 @@
+modLoader = "javafml"
+loaderVersion = "[36,)"
+#issueTrackerURL = ""
+license = "All rights reserved"
+
+[[mods]]
+modId = "itemshare"
+version = "${version}"
+displayName = "ItemShare"
+authors = "Picono435"
+description = '''
+This mod is a simple mod that creates a command that allows you to transfer items between servers!
+'''
+#logoFile = "assets/itemshare/icon.png"
+
+[[dependencies.itemshare]]
+modId = "forge"
+mandatory = true
+versionRange = "[36,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.itemshare]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.16,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.itemshare]]
+modId = "architectury"
+mandatory = true
+versionRange = "[1.26.42,)"
+ordering = "AFTER"
+side = "BOTH"
