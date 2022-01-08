@@ -32,49 +32,27 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ServerArgumentType implements ArgumentType<ItemServer> {
-    private static final Collection<String> EXAMPLES;
+    private static final Collection<String> EXAMPLES = new ArrayList<>();
     private static final DynamicCommandExceptionType INVALID_SERVER_EXCEPTION;
-    private List<String> serverList = new ArrayList<>();
 
     @Override
     public ItemServer parse(StringReader reader) throws CommandSyntaxException {
-        if(serverList.isEmpty()) {
-            try(Connection conn = ItemShare.hikari.getConnection()) {
-                PreparedStatement stm = conn.prepareStatement("SELECT * FROM itemshare_servers");
-                ResultSet rs = stm.executeQuery();
-                while(rs.next()) {
-                    String name = rs.getString("server");
-                    serverList.add(name);
-                }
-                stm.close();
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
-            }
-        }
         String name = reader.readString();
-        if(serverList.contains(name)) {
+        if(EXAMPLES.contains(name)) {
+            System.out.println("YEY");
             return new ItemServer(name);
         } else {
+            System.out.println("SADJE");
             throw INVALID_SERVER_EXCEPTION.create(name);
         }
     }
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        if(serverList.isEmpty()) {
-            try(Connection conn = ItemShare.hikari.getConnection()) {
-                PreparedStatement stm = conn.prepareStatement("SELECT * FROM itemshare_servers");
-                ResultSet rs = stm.executeQuery();
-                while(rs.next()) {
-                    String name = rs.getString("server");
-                    serverList.add(name);
-                }
-                stm.close();
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
-            }
-        }
-        return context.getSource() instanceof CommandSource ? CommandSource.suggestMatching(serverList.toArray(new String[0]), builder) : Suggestions.empty();
+        System.out.println(context.getSource() instanceof CommandSource);
+        System.out.println(EXAMPLES);
+        System.out.println(CommandSource.suggestMatching(EXAMPLES, builder));
+        return context.getSource() instanceof CommandSource ? CommandSource.suggestMatching(EXAMPLES, builder) : Suggestions.empty();
     }
 
     @Override
@@ -107,10 +85,21 @@ public class ServerArgumentType implements ArgumentType<ItemServer> {
     }
 
     static {
+        try(Connection conn = ItemShare.hikari.getConnection()) {
+            PreparedStatement stm = conn.prepareStatement("SELECT * FROM itemshare_servers");
+            ResultSet rs = stm.executeQuery();
+            while(rs.next()) {
+                String name = rs.getString("server");
+                EXAMPLES.add(name);
+            }
+            stm.close();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
         /*EXAMPLES = (Collection) Stream.of(World.OVERWORLD, World.NETHER).map((key) -> {
             return key.getValue().toString();
         }).collect(Collectors.toList());*/
-        EXAMPLES = Collections.emptyList();
+        //EXAMPLES = Collections.emptyList();
         INVALID_SERVER_EXCEPTION = new DynamicCommandExceptionType((id) -> {
             return new TranslatableText("argument.itemshare.text.invalid", new Object[]{id});
         });

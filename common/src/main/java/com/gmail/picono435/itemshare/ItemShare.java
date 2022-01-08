@@ -17,7 +17,7 @@ import net.minecraft.command.argument.serialize.ConstantArgumentSerializer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.StringNbtReader;
-import net.minecraft.text.Text;
+import net.minecraft.text.LiteralText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
@@ -25,7 +25,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Optional;
 
 public class ItemShare {
 
@@ -40,13 +39,56 @@ public class ItemShare {
         itemConfig = AutoConfig.getConfigHolder(ItemShareConfig.class).getConfig();
 
         CommandRegistrationEvent.EVENT.register((commandDispatcher, commandSelection) -> {
-            ItemShareCommand.register(commandDispatcher);
+            initHikari();
+            System.out.println("Registering ItemShare commands...");
+
             if(!ArgumentTypes.hasClass(ServerArgumentType.server())) {
                 ArgumentTypes.register("itemserver", ServerArgumentType.class, new ConstantArgumentSerializer<>(ServerArgumentType::server));
             }
+            ItemShareCommand.register(commandDispatcher);
         });
 
-        LifecycleEvent.SERVER_BEFORE_START.register((listener) -> {
+        LifecycleEvent.SERVER_STOPPING.register((listener) -> {
+            hikari.close();
+        });
+
+        PlayerEvent.PLAYER_JOIN.register((listener) -> {
+            if(hikari == null) return;
+            try(Connection conn = hikari.getConnection()) {
+                PreparedStatement stm = conn.prepareStatement("SELECT * FROM itemshare WHERE player=? AND to_server=?");
+                stm.setString(1, listener.getUuidAsString());
+                stm.setString(2, itemConfig.getServerName());
+                ResultSet rs = stm.executeQuery();
+                while(rs.next()) {
+                    int id = rs.getInt("id");
+                    String itemString = rs.getString("item");
+                    int amount = rs.getInt("amount");
+                    String nbtString = rs.getString("nbt");
+                    Item item = Registry.ITEM.get(new Identifier(itemString));
+                    ItemStack stack = new ItemStack(item, amount);
+                    if(nbtString != null) {
+                        StringNbtReader stringNbtReader = new StringNbtReader(new StringReader(nbtString));
+                        stack.setTag(stringNbtReader.parseCompound());
+                    }
+                    listener.giveItemStack(stack);
+                    PreparedStatement stmDelete = conn.prepareStatement("DELETE FROM itemshare WHERE id=?");
+                    stmDelete.setInt(1, id);
+                    stmDelete.executeUpdate();
+                    stmDelete.close();
+                    /*} else {
+                        listener.sendMessage(new LiteralText("§cCould not send you an item, make sure you don't have your inventory full."), true);
+                    }*/
+                }
+                stm.close();
+            } catch (SQLException | CommandSyntaxException throwables) {
+                listener.sendMessage(new LiteralText("§cCould not send you an item, please contact an Administrator."), true);
+                throwables.printStackTrace();
+            }
+        });
+    }
+
+    private static void initHikari() {
+        try {
             config.setDriverClassName("com.mysql.cj.jdbc.Driver");
             config.setJdbcUrl("jdbc:mysql://" + itemConfig.mysqlConfig.getAddress() + ":" + itemConfig.mysqlConfig.getPort() + "/" + itemConfig.mysqlConfig.getDatabaseName());
             config.setUsername(itemConfig.mysqlConfig.getUsername());
@@ -70,42 +112,9 @@ public class ItemShare {
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
             }
-        });
-
-        LifecycleEvent.SERVER_STOPPING.register((listener) -> {
-            hikari.close();
-        });
-
-        PlayerEvent.PLAYER_JOIN.register((listener) -> {
-            try(Connection conn = hikari.getConnection()) {
-                PreparedStatement stm = conn.prepareStatement("SELECT * FROM itemshare WHERE player=? AND to_server=?");
-                stm.setString(1, listener.getUuidAsString());
-                stm.setString(2, itemConfig.getServerName());
-                ResultSet rs = stm.executeQuery();
-                while(rs.next()) {
-                    int id = rs.getInt("id");
-                    String itemString = rs.getString("item");
-                    int amount = rs.getInt("amount");
-                    String nbtString = rs.getString("nbt");
-                    Item item = Registry.ITEM.get(new Identifier(itemString));
-                    ItemStack stack = new ItemStack(item, amount);
-                    if(nbtString != null) {
-                        StringNbtReader stringNbtReader = new StringNbtReader(new StringReader(nbtString));
-                        stack.setTag(stringNbtReader.parseCompound());
-                    }
-                    listener.giveItemStack(stack);
-                    PreparedStatement stmDelete = conn.prepareStatement("DELETE * FROM itemshare WHERE id=?");
-                    stmDelete.setInt(1, id);
-                    /*} else {
-                        listener.sendMessage(Text.of("§cCould not send you an item, make sure you don't have your inventory full."), true);
-                    }*/
-                }
-                stm.close();
-            } catch (SQLException | CommandSyntaxException throwables) {
-                listener.sendMessage(Text.of("§cCould not send you an item, please contact an Administrator."), true);
-                throwables.printStackTrace();
-            }
-        });
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
 

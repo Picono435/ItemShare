@@ -40,9 +40,16 @@ allprojects {
         // for more information about repositories.
     }
 
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
     tasks.withType(JavaCompile) {
         options.encoding = "UTF-8"
-        options.release = 16
+        options.release = 8
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        it.options.release = 8
     }
 
     java {

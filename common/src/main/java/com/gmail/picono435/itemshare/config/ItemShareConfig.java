@@ -4,6 +4,11 @@ import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 @Config(name = "itemshare")
 public class ItemShareConfig implements ConfigData {
 
@@ -11,6 +16,18 @@ public class ItemShareConfig implements ConfigData {
 
     public String getServerName() {
         return serverName;
+    }
+
+    boolean isWhitelist = false;
+
+    public boolean isWhitelist() {
+        return isWhitelist;
+    }
+
+    List<String> whitelist = Collections.singletonList("minecraft:barrier");
+
+    public List<String> getWhitelist() {
+        return whitelist;
     }
 
     @ConfigEntry.Gui.CollapsibleObject(startExpanded = true)
