@@ -1,12 +1,12 @@
-# Architectury Example Mod
+# ItemShare Mod
 
-Example Mod for setting up Architectury mods.
+Useful mod to transfer items between modpacks, servers, or even mod loaders :O.
 
-**You might want to visit [Architectury Templates](https://github.com/architectury/architectury-templates) instead, for easier set-up and more up-to-date dependencies.**
+**You must have a valid MySQL database to setup the mod.**
 ___
 
-Architectury API is added by default, there are instructions on how to remove them within the buildscripts, depending on the API is not required to use the Architectury toolchain.
+Mod requires Architectury API mod. Works in Fabric & Forge for 1.16.x & 1.18.x
 
-**Documentation:** https://docs.architectury.dev/
+**Commands:** /itemshare [server]
 
-**Discord:** https://discord.gg/C2RdJDpRBP
+**Discord:** https://discord.gg/wQj53Hy
